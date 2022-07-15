@@ -47,9 +47,17 @@ def tokenize(checker, sequence):
     return tokens
 
 
+def postprocess(sequence, prediction):
+    tokens = sequence.split()
+    predicted_tokens = prediction.split()
+    for i, token in enumerate(tokens):
+        if "'" in token:
+            predicted_tokens[i] = token
+    return " ".join(predicted_tokens)
+
+
 def predict(checker, sequence):
     tokens = tokenize(checker, sequence)
-    print("tokens:", tokens)
     space_positions = set()
     pos = 0
     for i, token in enumerate(tokens):
@@ -62,13 +70,13 @@ def predict(checker, sequence):
                 t_pos += 1
             pos += 1
     result = checker.correct(sequence)
-    print("result:", result)
     result_tokens = result.split()
     result_sequence = ""
     for i, token in enumerate(result_tokens):
         if i in space_positions:
             result_sequence += ' '
         result_sequence += token
+    result_sequence = postprocess(sequence, result_sequence)
     return result_sequence
 
 
