@@ -170,6 +170,9 @@ def model_inference(model, data, topk, device, batch_size=16, vocab_=None):
         # batch_labels = [line.lower() for line in batch_labels]
         # batch_sentences = [line.lower() for line in batch_sentences]
         # batch_predictions = [line.lower() for line in batch_predictions]
+        print("labels:", batch_labels)
+        print("sentences:", batch_sentences)
+        print("predictions:", batch_predictions)
         corr2corr, corr2incorr, incorr2corr, incorr2incorr = \
             get_metrics(batch_labels, batch_sentences, batch_predictions, check_until_topk=topk, return_mistakes=False)
         _corr2corr += corr2corr
