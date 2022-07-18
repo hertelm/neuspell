@@ -1,4 +1,5 @@
 import argparse
+import time
 
 from neuspell import CnnlstmChecker, SclstmChecker, NestedlstmChecker, BertChecker, ElmosclstmChecker, \
     BertsclstmChecker, SclstmbertChecker, SclstmelmoChecker
@@ -51,7 +52,7 @@ def postprocess(sequence, prediction):
     tokens = sequence.split()
     predicted_tokens = prediction.split()
     for i, token in enumerate(tokens):
-        if "'" in token:
+        if not token.isalpha():
             predicted_tokens[i] = token
     return " ".join(predicted_tokens)
 
@@ -90,13 +91,17 @@ def main(args):
         out_file = open(args.out_file, "w")
     else:
         out_file = None
+    total_runtime = 0
     for sequence in sequences:
+        start_time = time.time()
         predicted = predict(checker, sequence)
+        total_runtime += time.time() - start_time
         print(predicted)
         if out_file:
             out_file.write(predicted)
             out_file.write("\n")
     if out_file:
+        out_file.write(str(total_runtime) + "\n")
         out_file.close()
 
 
