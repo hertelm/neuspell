@@ -44,11 +44,20 @@ def tokenize(checker, sequence):
     return tokens
 
 
+def is_non_editable(token):
+    contains_alpha = False
+    for char in token:
+        contains_alpha = contains_alpha or char.isalpha()
+    if char == "'":
+        return True
+    return not contains_alpha
+
+
 def postprocess(sequence, prediction):
     tokens = sequence.split()
     predicted_tokens = prediction.split()
     for i, token in enumerate(tokens):
-        if not token.isalpha():
+        if is_non_editable(token):
             predicted_tokens[i] = token
     return " ".join(predicted_tokens)
 
