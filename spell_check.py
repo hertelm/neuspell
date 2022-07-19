@@ -1,8 +1,7 @@
 import argparse
 import time
 
-from neuspell import CnnlstmChecker, SclstmChecker, NestedlstmChecker, BertChecker, ElmosclstmChecker, \
-    BertsclstmChecker, SclstmbertChecker, SclstmelmoChecker
+from neuspell import BertChecker, SclstmChecker
 from neuspell.corrector import Corrector
 from neuspell.seq_modeling.helpers import bert_tokenize_for_valid_examples
 from neuspell.seq_modeling.helpers import sclstm_tokenize
@@ -10,20 +9,17 @@ from neuspell.commons import spacy_tokenizer
 
 
 CHECKERS = {
-    "CnnlstmChecker": CnnlstmChecker,
-    "SclstmChecker": SclstmChecker,
-    "NestedlstmChecker": NestedlstmChecker,
-    "BertChecker": BertChecker,
-    "ElmosclstmChecker": ElmosclstmChecker,
-    "BertsclstmChecker": BertsclstmChecker,
-    "SclstmbertChecker": SclstmbertChecker,
-    "SclstmelmoChecker": SclstmelmoChecker
+    "BertChecker",
+    "SclstmelmoChecker"
 }
 
 
 def load_checker(checker_name) -> Corrector:
-    checker_class = CHECKERS[checker_name]
-    checker = checker_class()
+    if checker_name == "BertChecker":
+        checker = BertChecker()
+    else:
+        checker = SclstmChecker()
+        checker = checker.add_("elmo", at="output")
     checker.from_pretrained()
     return checker
 
