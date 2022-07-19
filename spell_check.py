@@ -44,45 +44,56 @@ def tokenize(checker, sequence):
     return tokens
 
 
-def is_non_editable(token):
-    contains_alpha = False
-    for char in token:
-        contains_alpha = contains_alpha or char.isalpha()
-    if char == "'":
-        return True
-    return not contains_alpha
-
-
-def postprocess(sequence, prediction):
+def postprocess_sequence(sequence, prediction):
     tokens = sequence.split()
     predicted_tokens = prediction.split()
     for i, token in enumerate(tokens):
-        if is_non_editable(token):
-            predicted_tokens[i] = token
+        for j in range(1, len(token) - 1):
+            if token[j] == "'" or token[j] == " ":
+                predicted_tokens[i] = token
+                break
     return " ".join(predicted_tokens)
+
+
+def preprocess_tokens(sequence, tokens):
+    pos = 0
+    for t_i, token in enumerate(tokens):
+        for c_i, char in enumerate(token):
+            if sequence[pos] == " ":
+                tokens[t_i] = tokens[t_i][:c_i] + " " + tokens[t_i][c_i:]
+                pos += 1
+            pos += 1
+        if pos < len(sequence) and sequence[pos] == " ":
+            pos += 1
+    return tokens
+
+
+def postprocess_tokens(tokens, predicted_tokens):
+    for i, token in enumerate(tokens):
+        if not token.isalpha():
+            predicted_tokens[i] = token
+    return predicted_tokens
 
 
 def predict(checker, sequence):
     tokens = tokenize(checker, sequence)
+    tokens = preprocess_tokens(sequence, tokens)
     space_positions = set()
     pos = 0
     for i, token in enumerate(tokens):
         if pos < len(sequence) and sequence[pos] == ' ':
             space_positions.add(i)
             pos += 1
-        t_pos = 0
-        while t_pos < len(token) and pos < len(sequence):
-            if sequence[pos] != ' ':
-                t_pos += 1
-            pos += 1
+        pos += len(token)
     result = checker.correct(sequence)
     result_tokens = result.split()
+    postprocess_tokens(tokens, result_tokens)
     result_sequence = ""
     for i, token in enumerate(result_tokens):
         if i in space_positions:
             result_sequence += ' '
         result_sequence += token
-    result_sequence = postprocess(sequence, result_sequence)
+    result_sequence = postprocess_sequence(sequence, result_sequence)
     return result_sequence
 
 
